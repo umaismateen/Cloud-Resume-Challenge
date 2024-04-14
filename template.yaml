@@ -29,6 +29,38 @@ Resources:
       WebsiteConfiguration:
         IndexDocument: index.html
 
+  SSLCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: "*.umais-ch.com" # Your domain name
+      ValidationMethod: DNS
+            
+  CloudResumeWebsiteDistribution:
+    Type: "AWS::CloudFront::Distribution"
+    Properties:
+      DistributionConfig:
+        ViewerCertificate:
+          AcmCertificateArn: !Ref SSLCertificate
+          SslSupportMethod: sni-only
+        Aliases:
+          - "*.umais-ch.com" # Your domain name
+        DefaultCacheBehavior:
+          ViewerProtocolPolicy: redirect-to-https
+          TargetOriginId: website-cloud-resume.s3-website-us-east-1.amazonaws.com # S3 bucket URL
+          # Forward the path to the S3 bucket every request
+          DefaultTTL: 0
+          MinTTL: 0
+          MaxTTL: 0
+          ForwardedValues:
+            QueryString: false
+        Origins:
+          - DomainName: website-cloud-resume.s3-website-us-east-1.amazonaws.com # S3 bucket URL
+            Id: website-cloud-resume.s3-website-us-east-1.amazonaws.com # S3 bucket URL
+            CustomOriginConfig:
+              OriginProtocolPolicy: http-only
+        Enabled: "true"
+        DefaultRootObject: index.html
+
   BucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
