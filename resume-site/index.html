@@ -7,5 +7,14 @@
 </head>
 <body>
     <h1>Hello World! Welcome to My Cloud Resume</h1>
+    <p>Vistors: <span id="count-vistors"></span></p>
+
+    <script>
+        fetch('https://ta84a7s3de.execute-api.us-east-1.amazonaws.com/Prod/put')
+        .then(() => fetch('https://ta84a7s3de.execute-api.us-east-1.amazonaws.com/Prod/get'))
+        .then(res => res.json()).then(res => {
+            document.getElementById('count-vistors').innerHTML = res.visitors;
+        })
+    </script>
 </body>
 </html>
