@@ -1,42 +1,40 @@
 import json
-
-# import requests
-
+import boto3
+from botocore.exceptions import ClientError
 
 def lambda_handler(event, context):
-    """Sample pure Lambda function
+    # Initialize a DynamoDB client with Boto3
+    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 
-    Parameters
-    ----------
-    event: dict, required
-        API Gateway Lambda Proxy Input Format
+    # Reference the DynamoDB table
+    table = dynamodb.Table('cloud-resume-challenge')    
 
-        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
+    # Update the item in the table
+    try:
+        response = table.update_item(
+            Key={
+                'ID': 'visitors'
+            },
+            UpdateExpression='ADD visitors :inc',
+            ExpressionAttributeValues={
+                ':inc': 1
+            },
+            ReturnValues="UPDATED_NEW"
+        )
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Headers': '*'
+            },
+            'body': json.dumps('Update successful')
+        }
 
-    context: object, required
-        Lambda Context runtime methods and attributes
-
-        Context doc: https://docs.aws.amazon.com/lambda/latest/dg/python-context-object.html
-
-    Returns
-    ------
-    API Gateway Lambda Proxy Output Format: dict
-
-        Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
-    """
-
-    # try:
-    #     ip = requests.get("http://checkip.amazonaws.com/")
-    # except requests.RequestException as e:
-    #     # Send some context about this error to Lambda Logs
-    #     print(e)
-
-    #     raise e
-
-    return {
-        "statusCode": 200,
-        "body": json.dumps({
-            "message": "hello world",
-            # "location": ip.text.replace("\n", "")
-        }),
-    }
+    except ClientError as e:
+        print(e.response['Error']['Message'])
+        return {
+            'statusCode': 500,
+            'body': json.dumps('Error updating item')
+        }
+    
