@@ -1,2 +1,5 @@
 boto3
 requests
+urllib3
+pytest
+moto
