@@ -1,0 +1,32 @@
+name: main
+
+on: [push]
+
+jobs:
+  test-lambda-functions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+
+    - name: Install dependencies
+      run: |
+        cd get_function
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        cd ../put_function
+        pip install -r requirements.txt
+        cd ..
+
+    - name: Run tests for get_function
+      run:
+        pytest get_function
+
+    - name: Run tests for put_function
+      run: 
+        pytest put_function
